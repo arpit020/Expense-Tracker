@@ -1,6 +1,7 @@
 package com.ExpenseTracker.AuthService.Auth;
 
 
+import com.ExpenseTracker.AuthService.EventProducer.UserInfoProducer;
 import com.ExpenseTracker.AuthService.Repository.UserRepository;
 import com.ExpenseTracker.AuthService.Service.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
@@ -33,11 +34,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 public class SecurityConfig {
     private PasswordEncoder passwordEncoder;
     private UserDetailsServiceImpl userDetailsServiceImpl;
+    private final UserInfoProducer userInfoProducer;
 
 
     @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        return new UserDetailsServiceImpl(userRepository, passwordEncoder);
+    public UserDetailsService userDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder , UserInfoProducer userInfoProducer) {
+        return new UserDetailsServiceImpl(userRepository, passwordEncoder,userInfoProducer);
     }
 
     @Bean

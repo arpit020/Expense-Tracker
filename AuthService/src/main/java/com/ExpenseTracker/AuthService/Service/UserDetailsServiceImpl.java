@@ -1,6 +1,8 @@
 package com.ExpenseTracker.AuthService.Service;
 
 import com.ExpenseTracker.AuthService.Entity.UserInfo;
+import com.ExpenseTracker.AuthService.EventProducer.UserInfoEvent;
+import com.ExpenseTracker.AuthService.EventProducer.UserInfoProducer;
 import com.ExpenseTracker.AuthService.Model.UserInfoDto;
 import com.ExpenseTracker.AuthService.Repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,8 @@ public class UserDetailsServiceImpl implements UserDetailsService
 
      private PasswordEncoder passwordEncoder;
 
+     private UserInfoProducer userInfoProducer;
+
 
     private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
@@ -59,8 +63,19 @@ public class UserDetailsServiceImpl implements UserDetailsService
             return false;
         }
         String userId = UUID.randomUUID().toString();
-        userRepository.save(new UserInfo(userId, userInfoDto.getUsername(), userInfoDto.getPassword(), new HashSet<>()));
+       // userRepository.save(new UserInfo(userId, userInfoDto.getUsername(), userInfoDto.getPassword(), new HashSet<>()));
+        userInfoProducer.addTopicToKafka(userInfoEventToPublish(userInfoDto, userId));
         // pushEventToQueue
         return true;
+    }
+
+    private UserInfoEvent userInfoEventToPublish(UserInfoDto userInfoDto, String userId){
+        return UserInfoEvent.builder()
+                .userId(userId)
+                .firstName(userInfoDto.getUsername())
+                .lastName(userInfoDto.getLastName())
+                .email(userInfoDto.getEmail())
+                .phoneNumber(userInfoDto.getPhoneNumber()).build();
+
     }
 }
